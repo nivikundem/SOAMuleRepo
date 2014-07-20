@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ftp="http://www.mulesoft.org/schema/mule/ee/ftp" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/ftp http://www.mulesoft.org/schema/mule/ee/ftp/current/mule-ftp-ee.xsd">
+    <http:polling-connector name="HTTP_Polling" cookieSpec="netscape" validateConnections="true" pollingFrequency="1000" sendBufferSize="0" receiveBufferSize="0" receiveBacklog="0" clientSoTimeout="10000" serverSoTimeout="10000" socketSoLinger="0" doc:name="HTTP Polling"/>
+    <flow name="performancepushFlow1" doc:name="performancepushFlow1">
+        <http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="8080" path="QE2PerformanceActivity/QE2PerformanceApplication/api" connector-ref="HTTP_Polling" doc:name="HTTP"/>
+        <logger message="After polling from REST Webservice : #[payload:java.lang.String]" level="INFO" doc:name="Logger"/>
+        <set-variable variableName="inputXml" value="#[message.payload]" doc:name="Variable"/>
+        <set-payload value="#[inputXml]" doc:name="Set Payload"/>
+        <mulexml:xslt-transformer maxIdleTransformers="2" maxActiveTransformers="5" xsl-file="xslt\CrossingActivity.xslt" doc:name="CrossingActivity"/>
+        <file:outbound-endpoint responseTimeout="10000" doc:name="File" outputPattern="QE2CrossingActivity.csv" path="C:\JobSearch\QE2CsvFiles"/>
+        <ftp:outbound-endpoint host="localhost" port="21" user="user1" password="password" responseTimeout="10000" doc:name="FTP"/>
+    </flow>
+</mule>
